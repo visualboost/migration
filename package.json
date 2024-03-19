@@ -1,0 +1,24 @@
+{
+  "name": "visualBoost-migration-service",
+  "version": "0.0.1",
+  "description": "",
+  "main": "/bin/visualboost_migration.js",
+  "bin": {
+    "vbmigration": "/bin/visualboost_migration.js"
+  },
+  "scripts": {
+    "up": "node -e 'require(\"./index\").up()'",
+    "down": "node -e 'require(\"./index\").down()'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^12.0.0",
+    "dotenv": "16.4.5",
+    "lodash": "^4.17.21",
+    "migrate-mongo": "11.0.0",
+    "node-fetch": "^3.3.2",
+    "winston": "3.12.0"
+  }
+}

@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+  migration:
+    container_name: visualboost_migration
+    image: 'visualboost/migration:latest'
+    restart: 'no'
+    env_file:
+      - .env
+    expose:
+      - ${MONGO_PORT_AUTH}
+      - ${MONGO_PORT_MAIN}
+      - ${MONGO_PORT_BUILD}
+      - ${HTTP_PORT_AUTH}
+      - ${HTTP_PORT_MAIN}
+      - ${HTTP_PORT_BUILD}
+    volumes:
+      - ${LOG_DIR_MIGRATION}:/logs
+      - ${BACKUP_DIR_MIGRATION}:/backup
+    networks:
+      - visual_boost_auth_network
+      - visual_boost_main_network
+      - visual_boost_build_network
+#      - visualboost
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+# FOR PRODUCTION
+#  visualboost:
+#    name: ${NETWORK}
+# FOR TEST
+  visual_boost_auth_network:
+    external: true
+  visual_boost_main_network:
+    external: true
+  visual_boost_build_network:
+    external: true
