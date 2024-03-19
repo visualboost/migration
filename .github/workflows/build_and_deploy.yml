@@ -1,0 +1,47 @@
+name: Build and Publish to Dockerhub
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, '[BUILD IMAGE]') && !(contains(github.event.head_commit.message, '[SKIP_BUILD]'))
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.MIGRATION_ACTION_ACCESS_TOKEN }}
+          fetch-depth: 0
+
+      - name: Fetch all tags to get the recent version
+        run: |
+          git fetch --all --tag
+
+      - name: get-npm-version
+        id: get_npm_version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+        with:
+          path: backend
+
+      - name: print version
+        run: |
+          echo "${{ steps.get_npm_version.outputs.current-version}}"
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            visualboost/migration:${{ steps.get_npm_version.outputs.current-version}}
+            visualboost/migration:latest
