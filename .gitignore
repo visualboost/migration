@@ -1,0 +1,15 @@
+#Ignore configuration file
+*.env
+.docker/env
+
+#Ignore dependency files
+node_modules
+package-lock.json
+
+#Ignore IDE files
+.idea
+backend/.idea
+
+#Ignore Log & backups files
+logs
+backup
