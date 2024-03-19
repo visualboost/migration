@@ -24,7 +24,7 @@ jobs:
         id: get_npm_version
         uses: martinbeentjes/npm-get-version-action@v1.3.1
         with:
-          path: backend
+          path: .
 
       - name: print version
         run: |
