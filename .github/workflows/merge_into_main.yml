@@ -23,8 +23,8 @@ jobs:
     - name: Fetch all tags to create new version number
       if: "!contains(github.event.head_commit.message, '[KEEP_VERSION]')"
       run: |
-        git config user.name ${{ secrets.USER }}
-        git config user.email ${{ secrets.EMAIL }}
+#        git config user.name ${{ secrets.USER }}
+#        git config user.email ${{ secrets.EMAIL }}
         git fetch --all --tag
         git tag
 
@@ -39,21 +39,11 @@ jobs:
         debug: true
         version_format: "${major}.${minor}.${patch}"
 
-    - name: get git status
-      if: "!contains(github.event.head_commit.message, '[KEEP_VERSION]')"
-      run: |
-        git status
-
     # Increase the current application version
     - name: Increase version in package.json
       if: "!contains(github.event.head_commit.message, '[KEEP_VERSION]')"
       run: |
-        npm version --allow-same-version ${{steps.get_version.outputs.version}}
-
-    - name: get git status
-      if: "!contains(github.event.head_commit.message, '[KEEP_VERSION]')"
-      run: |
-        git status
+        npm version --allow-same-version --no-git-tag-version ${{steps.get_version.outputs.version}}
 
     # Commit the new version
     - name: Commit and push version
