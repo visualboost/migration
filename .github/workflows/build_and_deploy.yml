@@ -1,36 +1,47 @@
-# This is a basic workflow to help you get started with Actions
+name: Build and Publish to Dockerhub
 
-name: CI
-
-# Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
+  push_to_registry:
+    name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    if: contains(github.event.head_commit.message, '[BUILD IMAGE]') && !(contains(github.event.head_commit.message, '[SKIP_BUILD]'))
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.MIGRATION_ACTION_ACCESS_TOKEN }}
+          fetch-depth: 0
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: Fetch all tags to get the recent version
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          git fetch --all --tag
+
+      - name: get-npm-version
+        id: get_npm_version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+        with:
+          path: backend
+
+      - name: print version
+        run: |
+          echo "${{ steps.get_npm_version.outputs.current-version}}"
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_HUB_USER }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            visualboost/migration:${{ steps.get_npm_version.outputs.current-version}}
+            visualboost/migration:latest
