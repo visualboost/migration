@@ -39,11 +39,23 @@ jobs:
         debug: true
         version_format: "${major}.${minor}.${patch}"
 
+  # Print repository
+    - name: Print repository
+      if: "!contains(github.event.head_commit.message, '[KEEP_VERSION]')"
+      run: |
+        ls -la
+
     # Increase the current application version
     - name: Increase version in package.json
       if: "!contains(github.event.head_commit.message, '[KEEP_VERSION]')"
       run: |
         npm version --allow-same-version ${{steps.get_version.outputs.version}}
+
+    # Print package.json
+    - name: Print package.json
+      if: "!contains(github.event.head_commit.message, '[KEEP_VERSION]')"
+      run: |
+        cat package.json
 
     # Commit the new version
     - name: Commit and push version
