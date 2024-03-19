@@ -23,8 +23,6 @@ jobs:
     - name: Fetch all tags to create new version number
       if: "!contains(github.event.head_commit.message, '[KEEP_VERSION]')"
       run: |
-#        git config user.name ${{ secrets.USER }}
-#        git config user.email ${{ secrets.EMAIL }}
         git fetch --all --tag
         git tag
 
