@@ -6,7 +6,7 @@ on:
 
 jobs:
   test_and_merge:
-    name: Run tests and merge the new version into main branch
+    name: Increase Version and merge with main branch
     runs-on: ubuntu-latest
 
     strategy:
@@ -41,7 +41,6 @@ jobs:
     - name: Increase version in package.json
       if: "!contains(github.event.head_commit.message, '[KEEP_VERSION]')"
       run: |
-        cd ./backend
         npm version --allow-same-version ${{steps.get_version.outputs.version}}
 
     # Commit the new version
