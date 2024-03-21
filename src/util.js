@@ -79,14 +79,25 @@ const runUp = async (target, user, password, domain, port, dbname, authsource) =
 }
 
 const runDown = async (target, user, password, domain, port, dbname, authsource) => {
-    setConfig(target, user, password, domain, port, dbname, authsource);
-    createMigrationDir(target);
+    let dbClient;
 
-    const {db, client} = await database.connect();
-    logInfo(target, "Rollback migration");
+    try {
+        setConfig(target, user, password, domain, port, dbname, authsource);
+        createMigrationDir(target);
 
-    await down(db, client);
-    await client.close();
+        const {db, client} = await database.connect();
+        dbClient = client;
+
+        //Create backup first before running the migration
+        logInfo(target, "Start - Create Backup of target: " + target.id);
+        await runBackup(target, user, password, domain, port, dbname, authsource);
+        logInfo(target, "Finished - Create Backup of target: " + target.id);
+
+        logInfo(target, "Run Downgrade");
+        return await down(db, dbClient);
+    } finally {
+        await dbClient?.close();
+    }
 }
 
 const runBackup = async (target, user, password, domain, port, dbname, authsource) => {
